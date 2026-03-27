@@ -189,13 +189,13 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 
 #   tags = local.common_tags
 # }
-resource "aws_cloudwatch_event_rule" "lambda_schedule" {
-  #name                = "${local.lambda_name}-schedule"
-  name = "${local.lambda_name}-schedule-${local.unique_suffix}"
-  schedule_expression = var.lambda_schedule
+# resource "aws_cloudwatch_event_rule" "lambda_schedule" {
+#   #name                = "${local.lambda_name}-schedule"
+#   name = "${local.lambda_name}-schedule-${local.unique_suffix}"
+#   schedule_expression = var.lambda_schedule
 
-  tags = local.common_tags
-}
+#   tags = local.common_tags
+# }
 resource "aws_cloudwatch_event_target" "lambda_target" {
   rule      = aws_cloudwatch_event_rule.lambda_schedule.name
   target_id = "lambda"
@@ -305,29 +305,29 @@ resource "aws_iam_policy" "cleanup_policy" {
     ]
   })
 }
-resource "aws_iam_policy" "report_policy" {
-  #name = "${local.report_lambda_name}-policy"
-  name = "${local.report_lambda_name}-policy-${local.unique_suffix}"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeSnapshots"
-        ]
-        Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:*"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
+# resource "aws_iam_policy" "report_policy" {
+#   #name = "${local.report_lambda_name}-policy"
+#   name = "${local.report_lambda_name}-policy-${local.unique_suffix}"
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ec2:DescribeSnapshots"
+#         ]
+#         Resource = "*"
+#       },
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "logs:*"
+#         ]
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
 resource "aws_iam_role_policy_attachment" "cleanup_attach" {
   role       = aws_iam_role.cleanup_role.name
   policy_arn = aws_iam_policy.cleanup_policy.arn
