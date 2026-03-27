@@ -189,16 +189,16 @@ resource "aws_security_group" "private_ec2_sg" {
 # -------------------
 # AMI Lookup
 # -------------------
-data "aws_ami" "amazon_linux" {
-  most_recent = true
+# data "aws_ami" "amazon_linux" {
+#   most_recent = true
 
-  owners = ["amazon"]
+#   owners = ["amazon"]
 
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-}
+#   filter {
+#     name   = "name"
+#     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+#   }
+# }
 
 data "aws_ami" "amazon_linux" {
   most_recent = true
