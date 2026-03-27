@@ -28,3 +28,19 @@ variable "allowed_ssh_ip" {
   description = "IP allowed for SSH"
   type        = string
 }
+variable "lambda_function_name" {
+  description = "Lambda function name"
+  type        = string
+  default     = "snapshot-cleanup"
+}
+
+variable "lambda_schedule" {
+  description = "Schedule expression for Lambda"
+  type        = string
+  default     = "rate(1 day)"
+}
+
+variable "private_subnet_cidr" {
+  description = "CIDR block for private subnet"
+  type        = string
+}
