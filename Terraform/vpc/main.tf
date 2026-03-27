@@ -118,3 +118,86 @@ data "aws_ami" "amazon_linux" {
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 }
+
+resource "aws_iam_role" "lambda_role" {
+  name = "${local.lambda_name}-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+
+  tags = local.common_tags
+}
+
+resource "aws_iam_policy" "lambda_policy" {
+  name = "${local.lambda_name}-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      # Logs
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      },
+      # Example EC2 Snapshot permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeSnapshots",
+          "ec2:DeleteSnapshot"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_attach" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
+}
+
+resource "aws_lambda_function" "cleanup" {
+  function_name = local.lambda_name
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.12"
+
+  filename         = "${path.module}/lambda/lambda_function.zip"
+  source_code_hash = filebase64sha256("${path.module}/lambda/lambda_function.zip")
+
+  timeout = 60
+
+  tags = local.common_tags
+}
+resource "aws_cloudwatch_event_rule" "lambda_schedule" {
+  name                = "${local.lambda_name}-schedule"
+  schedule_expression = var.lambda_schedule
+
+  tags = local.common_tags
+}
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.lambda_schedule.name
+  target_id = "lambda"
+  arn       = aws_lambda_function.cleanup.arn
+}
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cleanup.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_schedule.arn
+}

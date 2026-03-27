@@ -7,3 +7,7 @@ locals {
     ManagedBy   = "Terraform"
   }
 }
+
+locals {
+  lambda_name = "${var.environment}-${var.lambda_function_name}"
+}
