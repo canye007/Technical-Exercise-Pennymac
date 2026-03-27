@@ -26,6 +26,7 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr
+  availability_zone       = local.az
   map_public_ip_on_launch = true
 
   tags = merge(local.common_tags, {
@@ -200,4 +201,50 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   function_name = aws_lambda_function.cleanup.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.lambda_schedule.arn
+}
+
+resource "aws_subnet" "private" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.private_subnet_cidr
+  availability_zone = local.az
+
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-private-subnet"
+  })
+}
+
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = local.common_tags
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public.id
+
+  depends_on = [aws_internet_gateway.igw]
+
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-nat"
+  })
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-private-rt"
+  })
+}
+
+resource "aws_route" "private_internet" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat.id
+}
+
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.private.id
 }

@@ -11,3 +11,7 @@ locals {
 locals {
   lambda_name = "${var.environment}-${var.lambda_function_name}"
 }
+
+locals {
+  az = "${var.aws_region}a"
+}

@@ -39,3 +39,8 @@ variable "lambda_schedule" {
   type        = string
   default     = "rate(1 day)"
 }
+
+variable "private_subnet_cidr" {
+  description = "CIDR block for private subnet"
+  type        = string
+}
