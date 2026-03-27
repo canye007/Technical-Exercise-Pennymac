@@ -171,19 +171,19 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-resource "aws_lambda_function" "cleanup" {
-  function_name = local.lambda_name
-  role          = aws_iam_role.lambda_role.arn
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.12"
+# resource "aws_lambda_function" "cleanup" {
+#   function_name = local.lambda_name
+#   role          = aws_iam_role.lambda_role.arn
+#   handler       = "lambda_function.lambda_handler"
+#   runtime       = "python3.12"
 
-  filename         = "${path.module}/lambda/lambda_function.zip"
-  source_code_hash = filebase64sha256("${path.module}/lambda/lambda_function.zip")
+#   filename         = "${path.module}/lambda/lambda_function.zip"
+#   source_code_hash = filebase64sha256("${path.module}/lambda/lambda_function.zip")
 
-  timeout = 60
+#   timeout = 60
 
-  tags = local.common_tags
-}
+#   tags = local.common_tags
+# }
 resource "aws_cloudwatch_event_rule" "lambda_schedule" {
   name                = "${local.lambda_name}-schedule"
   schedule_expression = var.lambda_schedule
