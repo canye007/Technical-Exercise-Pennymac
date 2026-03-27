@@ -109,6 +109,83 @@ resource "aws_instance" "web" {
   })
 }
 
+resource "aws_instance" "public_ec2" {
+  count         = var.public_instance_count
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+
+  subnet_id                   = aws_subnet.public.id
+  vpc_security_group_ids      = [aws_security_group.public_ec2_sg.id]
+  associate_public_ip_address = true
+
+  tags = merge(local.common_tags, {
+    Name = "${local.instance_name_prefix}-public-${count.index + 1}"
+  })
+}
+
+resource "aws_instance" "private_ec2" {
+  count         = var.private_instance_count
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+
+  subnet_id              = aws_subnet.private.id
+  vpc_security_group_ids = [aws_security_group.private_ec2_sg.id]
+
+  associate_public_ip_address = false
+
+  tags = merge(local.common_tags, {
+    Name = "${local.instance_name_prefix}-private-${count.index + 1}"
+  })
+}
+
+resource "aws_security_group" "public_ec2_sg" {
+  name   = "${local.name_prefix}-public-ec2-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ssh_ip]
+  }
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "private_ec2_sg" {
+  name   = "${local.name_prefix}-private-ec2-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "Allow from public subnet"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.public_ec2_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 # -------------------
 # AMI Lookup
 # -------------------
@@ -120,6 +197,22 @@ data "aws_ami" "amazon_linux" {
   filter {
     name   = "name"
     values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+
+  owners = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
   }
 }
 

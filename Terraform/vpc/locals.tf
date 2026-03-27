@@ -24,3 +24,7 @@ locals {
     ManagedBy   = "Terraform"
   }
 }
+
+locals {
+  instance_name_prefix = "${var.environment}-ec2"
+}

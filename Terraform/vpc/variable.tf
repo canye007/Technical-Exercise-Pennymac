@@ -56,3 +56,15 @@ variable "alert_email" {
   type        = string
   default     = "dummy@example.com"
 }
+variable "public_instance_count" {
+  default = 2
+}
+
+variable "private_instance_count" {
+  default = 1
+}
+
+variable "instance_ami" {
+  description = "AMI ID"
+  default     = "" # Amazon Linux (adjust per region)
+}
