@@ -176,7 +176,7 @@ data "aws_ami" "amazon_linux" {
 #   policy_arn = aws_iam_policy.lambda_policy.arn
 # }
 
-# resource "aws_lambda_function" "cleanup" {
+# resource "aws_lambda_function" "cpennymac" {
 #   function_name = local.lambda_name
 #   role          = aws_iam_role.lambda_role.arn
 #   handler       = "lambda_function.lambda_handler"
@@ -199,12 +199,12 @@ data "aws_ami" "amazon_linux" {
 # resource "aws_cloudwatch_event_target" "lambda_target" {
 #   rule      = aws_cloudwatch_event_rule.lambda_schedule.name
 #   target_id = "lambda"
-#   arn       = aws_lambda_function.cleanup.arn
+#   arn       = aws_lambda_function.cpennymac.arn
 # }
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cleanup.function_name
+  function_name = aws_lambda_function.cpennymac.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.lambda_schedule.arn
 }
@@ -254,9 +254,9 @@ resource "aws_route_table_association" "private_assoc" {
   subnet_id      = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
 }
-resource "aws_iam_role" "cleanup_role" {
-  #name = "${local.cleanup_lambda_name}-role"
-  name = "${local.cleanup_lambda_name}-role-${local.unique_suffix}"
+resource "aws_iam_role" "cpennymac_role" {
+  #name = "${local.cpennymac_lambda_name}-role"
+  name = "${local.cpennymac_lambda_name}-role-${local.unique_suffix}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -267,9 +267,9 @@ resource "aws_iam_role" "cleanup_role" {
     }]
   })
 }
-resource "aws_iam_role" "report_role" {
-  #name = "${local.report_lambda_name}-role"
-  name = "${local.report_lambda_name}-role-${local.unique_suffix}"
+resource "aws_iam_role" "pennymac_role" {
+  #name = "${local.pennymac_lambda_name}-role"
+  name = "${local.pennymac_lambda_name}-role-${local.unique_suffix}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -280,9 +280,9 @@ resource "aws_iam_role" "report_role" {
     }]
   })
 }
-resource "aws_iam_policy" "cleanup_policy" {
-  #name = "${local.cleanup_lambda_name}-policy"
-  name = "${local.cleanup_lambda_name}-policy-${local.unique_suffix}"
+resource "aws_iam_policy" "cpennymac_policy" {
+  #name = "${local.cpennymac_lambda_name}-policy"
+  name = "${local.cpennymac_lambda_name}-policy-${local.unique_suffix}"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -305,9 +305,9 @@ resource "aws_iam_policy" "cleanup_policy" {
     ]
   })
 }
-# resource "aws_iam_policy" "report_policy" {
-#   #name = "${local.report_lambda_name}-policy"
-#   name = "${local.report_lambda_name}-policy-${local.unique_suffix}"
+# resource "aws_iam_policy" "pennymac_policy" {
+#   #name = "${local.pennymac_lambda_name}-policy"
+#   name = "${local.pennymac_lambda_name}-policy-${local.unique_suffix}"
 #   policy = jsonencode({
 #     Version = "2012-10-17"
 #     Statement = [
@@ -328,34 +328,34 @@ resource "aws_iam_policy" "cleanup_policy" {
 #     ]
 #   })
 # }
-resource "aws_iam_role_policy_attachment" "cleanup_attach" {
-  role       = aws_iam_role.cleanup_role.name
-  policy_arn = aws_iam_policy.cleanup_policy.arn
+resource "aws_iam_role_policy_attachment" "cpennymac_attach" {
+  role       = aws_iam_role.cpennymac_role.name
+  policy_arn = aws_iam_policy.cpennymac_policy.arn
 
-  depends_on = [aws_iam_policy.cleanup_policy]
+  depends_on = [aws_iam_policy.cpennymac_policy]
 }
 
-resource "aws_iam_role_policy_attachment" "report_attach" {
-  role       = aws_iam_role.report_role.name
-  policy_arn = aws_iam_policy.report_policy.arn
+resource "aws_iam_role_policy_attachment" "pennymac_attach" {
+  role       = aws_iam_role.pennymac_role.name
+  policy_arn = aws_iam_policy.pennymac_policy.arn
 
-  depends_on = [aws_iam_policy.report_policy]
+  depends_on = [aws_iam_policy.pennymac_policy]
 }
-resource "aws_lambda_function" "cleanup" {
-  #function_name = local.cleanup_lambda_name
-  function_name = "${local.cleanup_lambda_name}-${local.unique_suffix}"
-  role          = aws_iam_role.cleanup_role.arn
+resource "aws_lambda_function" "cpennymac" {
+  #function_name = local.cpennymac_lambda_name
+  function_name = "${local.cpennymac_lambda_name}-${local.unique_suffix}"
+  role          = aws_iam_role.cpennymac_role.arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
 
-  filename         = "${path.module}/lambda/cleanup/lambda_function.zip"
+  filename         = "${path.module}/lambda/cleaning/lambda_function.zip"
   source_code_hash = filebase64sha256("${path.module}/lambda/cleanup/lambda_function.zip")
 
   timeout = 60
 }
-# resource "aws_lambda_function" "report" {
-#   function_name = local.report_lambda_name
-#   role          = aws_iam_role.report_role.arn
+# resource "aws_lambda_function" "pennymac" {
+#   function_name = local.pennymac_lambda_name
+#   role          = aws_iam_role.pennymac_role.arn
 #   handler       = "lambda_function.lambda_handler"
 #   runtime       = "python3.12"
 
@@ -364,62 +364,62 @@ resource "aws_lambda_function" "cleanup" {
 
 #   timeout = 60
 # }
-resource "aws_cloudwatch_event_rule" "cleanup_schedule" {
-  #name                = "${local.cleanup_lambda_name}-schedule"
-  name = "${local.cleanup_lambda_name}-schedule-${local.unique_suffix}"
-  schedule_expression = var.cleanup_schedule
+resource "aws_cloudwatch_event_rule" "cpennymac_schedule" {
+  #name                = "${local.cpennymac_lambda_name}-schedule"
+  name = "${local.cpennymac_lambda_name}-schedule-${local.unique_suffix}"
+  schedule_expression = var.cpennymac_schedule
 
   lifecycle {
     create_before_destroy = true
   }
 }
 
-resource "aws_cloudwatch_event_rule" "report_schedule" {
-  #name                = "${local.report_lambda_name}-schedule"
-  name = "${local.report_lambda_name}-schedule-${local.unique_suffix}"
-  schedule_expression = var.report_schedule
+resource "aws_cloudwatch_event_rule" "pennymac_schedule" {
+  #name                = "${local.pennymac_lambda_name}-schedule"
+  name = "${local.pennymac_lambda_name}-schedule-${local.unique_suffix}"
+  schedule_expression = var.pennymac_schedule
 
   lifecycle {
   create_before_destroy = true
 }
 }
-resource "aws_cloudwatch_event_target" "cleanup_target" {
-  rule = aws_cloudwatch_event_rule.cleanup_schedule.name
-  arn  = aws_lambda_function.cleanup.arn
+resource "aws_cloudwatch_event_target" "cpennymac_target" {
+  rule = aws_cloudwatch_event_rule.cpennymac_schedule.name
+  arn  = aws_lambda_function.cpennymac.arn
 }
 
-resource "aws_cloudwatch_event_target" "report_target" {
-  rule = aws_cloudwatch_event_rule.report_schedule.name
-  arn  = aws_lambda_function.report.arn
+resource "aws_cloudwatch_event_target" "pennymac_target" {
+  rule = aws_cloudwatch_event_rule.pennymac_schedule.name
+  arn  = aws_lambda_function.pennymac.arn
 }
-resource "aws_lambda_permission" "cleanup_allow" {
-  statement_id  = "AllowCleanup"
+resource "aws_lambda_permission" "cpennymac_allow" {
+  statement_id  = "Allowcpennymac"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cleanup.function_name
+  function_name = aws_lambda_function.cpennymac.function_name
   #function_name = "${local.lambda_name}-${local.unique_suffix}"
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.cleanup_schedule.arn
+  source_arn    = aws_cloudwatch_event_rule.cpennymac_schedule.arn
 }
 
-resource "aws_lambda_permission" "report_allow" {
-  statement_id  = "AllowReport"
+resource "aws_lambda_permission" "pennymac_allow" {
+  statement_id  = "Allowpennymac"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.report.function_name
+  function_name = aws_lambda_function.pennymac.function_name
   #function_name = "${local.lambda_name}-${local.unique_suffix}"
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.report_schedule.arn
+  source_arn    = aws_cloudwatch_event_rule.pennymac_schedule.arn
 }
-resource "aws_sns_topic" "report_topic" {
+resource "aws_sns_topic" "pennymac_topic" {
   name = local.sns_topic_name
 }
 resource "aws_sns_topic_subscription" "email" {
-  topic_arn = aws_sns_topic.report_topic.arn
+  topic_arn = aws_sns_topic.pennymac_topic.arn
   protocol  = "email"
   endpoint  = var.alert_email
 }
-resource "aws_iam_policy" "report_policy" {
-  #name = "${local.report_lambda_name}-policy"
-  name = "${local.report_lambda_name}-policy-${local.unique_suffix}"
+resource "aws_iam_policy" "pennymac_policy" {
+  #name = "${local.pennymac_lambda_name}-policy"
+  name = "${local.pennymac_lambda_name}-policy-${local.unique_suffix}"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -436,7 +436,7 @@ resource "aws_iam_policy" "report_policy" {
         Action = [
           "sns:Publish"
         ]
-        Resource = aws_sns_topic.report_topic.arn
+        Resource = aws_sns_topic.pennymac_topic.arn
       },
       {
         Effect = "Allow"
@@ -449,10 +449,10 @@ resource "aws_iam_policy" "report_policy" {
   })
 }
 
-resource "aws_lambda_function" "report" {
-  #function_name = local.report_lambda_name
-  function_name = "${local.report_lambda_name}-${local.unique_suffix}"
-  role          = aws_iam_role.report_role.arn
+resource "aws_lambda_function" "pennymac" {
+  #function_name = local.pennymac_lambda_name
+  function_name = "${local.pennymac_lambda_name}-${local.unique_suffix}"
+  role          = aws_iam_role.pennymac_role.arn
   handler       = "lambda_function.lambda_handler"
   runtime       = "python3.12"
 
@@ -463,7 +463,7 @@ resource "aws_lambda_function" "report" {
 
   environment {
     variables = {
-      SNS_TOPIC_ARN = aws_sns_topic.report_topic.arn
+      SNS_TOPIC_ARN = aws_sns_topic.pennymac_topic.arn
     }
   }
 }

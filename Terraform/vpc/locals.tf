@@ -16,11 +16,11 @@ locals {
   az = "${var.aws_region}a"
 }
 locals {
-  cleanup_lambda_name  = "${var.environment}-snapshot-cleanup"
-  report_lambda_name   = "${var.environment}-snapshot-report"
+  cpennymac_lambda_name  = "${var.environment}-snapshot-cleanup"
+  pennymac_lambda_name   = "${var.environment}-snapshot-report"
 }
 locals {
-  sns_topic_name = "${var.environment}-snapshot-report-topic"
+  sns_topic_name = "${var.environment}-snapshot-pennymac-topic"
 }
 locals {
   unique_suffix = random_id.suffix.hex

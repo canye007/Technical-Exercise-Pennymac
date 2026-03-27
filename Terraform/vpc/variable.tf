@@ -31,7 +31,7 @@ variable "allowed_ssh_ip" {
 variable "lambda_function_name" {
   description = "Lambda function name"
   type        = string
-  default     = "snapshot-cleanup"
+  default     = "snapshot-cpennymac"
 }
 
 variable "lambda_schedule" {
@@ -44,11 +44,11 @@ variable "private_subnet_cidr" {
   description = "CIDR block for private subnet"
   type        = string
 }
-variable "cleanup_schedule" {
+variable "cpennymac_schedule" {
   default = "rate(1 day)"
 }
 
-variable "report_schedule" {
+variable "pennymac_schedule" {
   default = "rate(1 day)"
 }
 variable "alert_email" {
