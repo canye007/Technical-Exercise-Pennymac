@@ -364,12 +364,20 @@ resource "aws_cloudwatch_event_rule" "cleanup_schedule" {
   #name                = "${local.cleanup_lambda_name}-schedule"
   name = "${local.cleanup_lambda_name}-schedule-${local.unique_suffix}"
   schedule_expression = var.cleanup_schedule
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "report_schedule" {
   #name                = "${local.report_lambda_name}-schedule"
   name = "${local.report_lambda_name}-schedule-${local.unique_suffix}"
   schedule_expression = var.report_schedule
+
+  lifecycle {
+  create_before_destroy = true
+}
 }
 resource "aws_cloudwatch_event_target" "cleanup_target" {
   rule = aws_cloudwatch_event_rule.cleanup_schedule.name
