@@ -27,7 +27,7 @@ locals {
 }
 locals {
   name_prefix   = "${var.environment}-vpc"
-  unique_suffix = random_id.suffix.hex
+  #unique_suffix = random_id.suffix.hex
 
   common_tags = {
     Environment = var.environment
