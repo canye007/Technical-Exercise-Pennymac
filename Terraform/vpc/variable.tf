@@ -44,3 +44,10 @@ variable "private_subnet_cidr" {
   description = "CIDR block for private subnet"
   type        = string
 }
+variable "cleanup_schedule" {
+  default = "rate(1 day)"
+}
+
+variable "report_schedule" {
+  default = "rate(1 day)"
+}

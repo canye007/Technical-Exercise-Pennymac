@@ -15,3 +15,7 @@ locals {
 locals {
   az = "${var.aws_region}a"
 }
+locals {
+  cleanup_lambda_name  = "${var.environment}-snapshot-cleanup"
+  report_lambda_name   = "${var.environment}-snapshot-report"
+}
