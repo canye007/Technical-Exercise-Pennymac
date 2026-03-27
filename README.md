@@ -231,11 +231,11 @@ The implementation is based on the following:
 
 ### Execution Sequence
 
-1. EventBridge triggers Lambda functions on a defined schedule
-2. Cleanup Lambda evaluates and deletes outdated snapshots
-3. Reporting Lambda compiles snapshot inventory
-4. SNS distributes report via email
-5. Logs and metrics are recorded for monitoring
+ EventBridge triggers Lambda functions on a defined schedule
+ Cleanup Lambda evaluates and deletes outdated snapshots
+ Reporting Lambda compiles snapshot inventory
+ SNS distributes report via email
+ Logs and metrics are recorded for monitoring
 
 
 # Security Considerations
@@ -262,6 +262,3 @@ EventBridge orchestrates scheduled execution
 Lambda performs processing and automation
 SNS enables notification delivery
 VPC enforces network isolation and security
-
-
-This implementation demonstrates a production-aligned, secure, and automated AWS solution for managing EC2 snapshot lifecycles. By leveraging Terraform and AWS serverless services, the solution achieves **operational efficiency, governance, and scalability** while adhering to enterprise best practices.
