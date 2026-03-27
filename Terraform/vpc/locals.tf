@@ -22,9 +22,9 @@ locals {
 locals {
   sns_topic_name = "${var.environment}-snapshot-report-topic"
 }
-# locals {
-#   unique_suffix = random_id.suffix.hex
-# }
+locals {
+  unique_suffix = random_id.suffix.hex
+}
 locals {
   name_prefix   = "${var.environment}-vpc"
   unique_suffix = random_id.suffix.hex

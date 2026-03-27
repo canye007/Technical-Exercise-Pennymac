@@ -123,58 +123,58 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-resource "aws_iam_role" "lambda_role" {
-  #name = "${local.lambda_name}-role"
-  name = "${local.lambda_name}-role-${local.unique_suffix}"
+# resource "aws_iam_role" "lambda_role" {
+#   #name = "${local.lambda_name}-role"
+#   name = "${local.lambda_name}-role-${local.unique_suffix}"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
-      Action = "sts:AssumeRole"
-    }]
-  })
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [{
+#       Effect = "Allow"
+#       Principal = {
+#         Service = "lambda.amazonaws.com"
+#       }
+#       Action = "sts:AssumeRole"
+#     }]
+#   })
 
-  tags = local.common_tags
-}
+#   tags = local.common_tags
+# }
 
-resource "aws_iam_policy" "lambda_policy" {
-  #name = "${local.lambda_name}-policy"
-  name = "${local.lambda_name}-policy-${local.unique_suffix}"
+# resource "aws_iam_policy" "lambda_policy" {
+#   #name = "${local.lambda_name}-policy"
+#   name = "${local.lambda_name}-policy-${local.unique_suffix}"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      # Logs
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "*"
-      },
-      # Example EC2 Snapshot permissions
-      {
-        Effect = "Allow"
-        Action = [
-          "ec2:DescribeSnapshots",
-          "ec2:DeleteSnapshot"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       # Logs
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "logs:CreateLogGroup",
+#           "logs:CreateLogStream",
+#           "logs:PutLogEvents"
+#         ]
+#         Resource = "*"
+#       },
+#       # Example EC2 Snapshot permissions
+#       {
+#         Effect = "Allow"
+#         Action = [
+#           "ec2:DescribeSnapshots",
+#           "ec2:DeleteSnapshot"
+#         ]
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
 
-resource "aws_iam_role_policy_attachment" "lambda_attach" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_iam_policy.lambda_policy.arn
-}
+# resource "aws_iam_role_policy_attachment" "lambda_attach" {
+#   role       = aws_iam_role.lambda_role.name
+#   policy_arn = aws_iam_policy.lambda_policy.arn
+# }
 
 # resource "aws_lambda_function" "cleanup" {
 #   function_name = local.lambda_name
@@ -196,11 +196,11 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 
 #   tags = local.common_tags
 # }
-resource "aws_cloudwatch_event_target" "lambda_target" {
-  rule      = aws_cloudwatch_event_rule.lambda_schedule.name
-  target_id = "lambda"
-  arn       = aws_lambda_function.cleanup.arn
-}
+# resource "aws_cloudwatch_event_target" "lambda_target" {
+#   rule      = aws_cloudwatch_event_rule.lambda_schedule.name
+#   target_id = "lambda"
+#   arn       = aws_lambda_function.cleanup.arn
+# }
 resource "aws_lambda_permission" "allow_eventbridge" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
@@ -331,11 +331,15 @@ resource "aws_iam_policy" "cleanup_policy" {
 resource "aws_iam_role_policy_attachment" "cleanup_attach" {
   role       = aws_iam_role.cleanup_role.name
   policy_arn = aws_iam_policy.cleanup_policy.arn
+
+  depends_on = [aws_iam_policy.cleanup_policy]
 }
 
 resource "aws_iam_role_policy_attachment" "report_attach" {
   role       = aws_iam_role.report_role.name
   policy_arn = aws_iam_policy.report_policy.arn
+
+  depends_on = [aws_iam_policy.report_policy]
 }
 resource "aws_lambda_function" "cleanup" {
   #function_name = local.cleanup_lambda_name
