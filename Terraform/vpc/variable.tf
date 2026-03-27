@@ -51,3 +51,8 @@ variable "cleanup_schedule" {
 variable "report_schedule" {
   default = "rate(1 day)"
 }
+variable "alert_email" {
+  description = "Email for SNS alerts"
+  type        = string
+  default     = "dummy@example.com"
+}
