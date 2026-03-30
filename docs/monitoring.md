@@ -1,4 +1,4 @@
-# Lambda Function Monitoring Strategy
+# Monitoring Strategy
  Overview
 Comprehensive monitoring of the EC2 Snapshot Cleanup Lambda function using AWS CloudWatch, including metrics, logs, alarms, and dashboards.
 
